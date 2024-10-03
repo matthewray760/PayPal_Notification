@@ -1,0 +1,12 @@
+from plyer import notification
+
+def show_notification(title, message):
+    notification.notify(
+        title=title,
+        message=message,
+        app_name='MyNotifier',  # The name of your application
+        timeout=10  # Duration in seconds the notification stays
+    )
+
+# Example usage
+#show_notification("Alert!", "This is an alert message.")
