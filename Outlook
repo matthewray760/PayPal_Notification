@@ -1,0 +1,20 @@
+import win32com.client
+
+def send_email(note):
+    # Create an instance of the Outlook application
+    outlook = win32com.client.Dispatch("Outlook.Application")
+    
+    # Create a new mail item
+    mail = outlook.CreateItem(0)  # 0: olMailItem
+
+    # Set the email parameters
+    mail.To = "matthewray@clearwateranalytics.com"  # Your email address
+    mail.Subject = "PayPal Alert"
+    mail.Body = note
+
+    #mail.Display()  # Opens the email for review
+   
+    # Send the email
+    mail.Send()  # This sends the
+
+
