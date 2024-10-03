@@ -1,0 +1,51 @@
+import pyodbc as py
+import pandas as pd
+import datetime
+import tkinter as tk
+
+
+
+def blk_execute_query():
+        # Set up the database connection parameters
+        server = 'P01-01-AG-004'
+        database = 'custodydata'
+        username = 'ARBFUND\matthewray'
+        password = 'Uhglbk547895207*'
+        driver = '{ODBC Driver 17 for SQL Server}'
+        MultiSubnetFailover=True
+        
+
+        # Create the connection string
+        conn_str = f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password};Trusted_Connection=yes;TrustServerCertificate=yes;MultiSubnetFailover=yes'
+
+        # Connect to the database
+        conn = py.connect(conn_str)
+
+        # Create a cursor object to execute the SQL statements
+        cursor = conn.cursor()
+
+        cursor.execute('SET QUERY_GOVERNOR_COST_LIMIT 300')
+
+        # Execute a SQL query
+        query = f'''
+        SELECT  dbo.DateFromGlobalDayNumber(_ReconDate)[Recon Date], CUSIP, Repo_Type,Trade_Date, Settle_Date, Expiration_Date, Repo_Transaction_Type,Trading_ID, 
+        Custody_Account_Number, TRANSACTION_TYPE2 FROM rawdata.FileModel_17488
+        WHERE 1=1
+	        and Repo_Transaction_Type IN ('RP','RR','CO','CI')
+	        and Account_Number != 'TESTCW'
+	        and Expiration_Date > dbo.DateFromGlobalDayNumber(_ReconDate)
+	        and CUSIP LIKE 'RP%'
+        '''
+
+        cursor.execute(query)
+
+        # Fetch all the rows from the query result
+        cursor.fetchall()
+        df = pd.read_sql(query,conn)
+
+        # Close the cursor and the connection
+        cursor.close()
+        conn.close()
+  
+
+        return df, print("SQL executed within the timeout period")
