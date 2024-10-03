@@ -1,0 +1,57 @@
+from sql import blk_execute_query
+import pandas as pd
+import pyodbc as py
+import pandas as pd
+from datetime import datetime, timedelta
+import tkinter as tk
+import numpy as np
+from plyer import notification
+from notification import show_notification
+from Outlook import send_email
+
+
+use_sql = False
+
+
+
+
+if use_sql == True:
+    data = blk_execute_query()[0]
+else:
+    pathway_insert = fr'C:\Users\matthewray\OneDrive - Clearwater\Desktop\Python\Python_Omega_Notification\Test.xlsx'
+    data = pd.read_excel(pathway_insert)
+
+
+data = data[['CUSIP','Expiration_Date','Custody_Account_Number']]
+data['Expiration_Date'] = pd.to_datetime(data['Expiration_Date'])
+
+
+# Calculate today's date minus 1 day
+threshold_date = datetime.today() - timedelta(days=10)
+
+# Filter the DataFrame
+filtered_df = data[data['Expiration_Date'] > threshold_date]
+
+# Display the filtered DataFrame
+print(filtered_df)
+print()
+
+today = pd.Timestamp(datetime.today().date())
+#last_business_day = pd.Timestamp(datetime.today().date() - timedelta(days=1))
+last_business_day = pd.Timestamp(datetime.today().date()) - pd.tseries.offsets.BDay(1)
+
+print(f"Today's Date: {today.date()}")
+print(f"Last Business Day: {last_business_day.date()}")
+print()
+
+
+# Alert on matching expiration dates
+matching_rows = data[data['Expiration_Date'] == last_business_day]
+
+if not matching_rows.empty:
+    show_notification("PAYPAL COLLATERAL", "Repo Maturity")
+    print("Alert! The following expiration dates are equal to today's date minus one business day:")
+    print(matching_rows)
+else:
+    print("No expiration dates match today's date minus one business day.")
+    send_email(note = "No collateral expiration today")
